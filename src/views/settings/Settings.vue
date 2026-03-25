@@ -37,6 +37,10 @@ div
   hr
 
   DeveloperSettings
+
+  hr
+
+  ServerSettings
 </template>
 
 <script lang="ts">
@@ -49,6 +53,7 @@ import ReleaseNotificationSettings from '~/views/settings/ReleaseNotificationSet
 import CategorizationSettings from '~/views/settings/CategorizationSettings.vue';
 import LandingPageSettings from '~/views/settings/LandingPageSettings.vue';
 import DeveloperSettings from '~/views/settings/DeveloperSettings.vue';
+import ServerSettings from '~/views/settings/ServerSettings.vue';
 import Theme from '~/views/settings/Theme.vue';
 import ColorSettings from '~/views/settings/ColorSettings.vue';
 import ActivePatternSettings from '~/views/settings/ActivePatternSettings.vue';
@@ -64,6 +69,7 @@ export default {
     Theme,
     ColorSettings,
     DeveloperSettings,
+    ServerSettings,
     ActivePatternSettings,
   },
   beforeRouteLeave(to, from, next) {

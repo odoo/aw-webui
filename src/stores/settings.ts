@@ -44,6 +44,8 @@ interface State {
   showYearly: boolean;
   useMultidevice: boolean;
   requestTimeout: number;
+  // Server configuration
+  cors_origins: string;
 
   // Set to true if settings loaded
   _loaded: boolean;
@@ -83,6 +85,7 @@ export const useSettingsStore = defineStore('settings', {
     showYearly: false,
     useMultidevice: false,
     requestTimeout: 30,
+    cors_origins: '',
 
     _loaded: false,
   }),
