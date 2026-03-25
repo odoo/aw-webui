@@ -34,6 +34,7 @@ import UncategorizedHintSettings from '~/views/settings/UncategorizedHintSetting
 import CategorizationSettings from '~/views/settings/CategorizationSettings.vue';
 import LandingPageSettings from '~/views/settings/LandingPageSettings.vue';
 import DeveloperSettings from '~/views/settings/DeveloperSettings.vue';
+import ServerSettings from '~/views/settings/ServerSettings.vue';
 import Theme from '~/views/settings/Theme.vue';
 import ColorSettings from '~/views/settings/ColorSettings.vue';
 import ActivePatternSettings from '~/views/settings/ActivePatternSettings.vue';
@@ -60,6 +61,7 @@ export default {
     Theme,
     ColorSettings,
     DeveloperSettings,
+    ServerSettings,
     ActivePatternSettings,
     PrivacyFilterSettings,
     AwNotifySettings,
@@ -129,7 +131,22 @@ export default {
         components: [{ name: 'AwNotifySettings' }],
       };
 
-      return [general, appearance, categorization, notifications, privacy, developer];
+      const serverSettings: Group = {
+        id: 'server',
+        label: 'Server',
+        help: 'Configure server CORS to let other website/extension to communication with Activity Watch.',
+        components: [{ name: 'ServerSettings' }],
+      };
+
+      return [
+        general,
+        appearance,
+        categorization,
+        notifications,
+        privacy,
+        developer,
+        serverSettings,
+      ];
     },
   },
   async created() {

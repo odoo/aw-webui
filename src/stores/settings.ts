@@ -72,6 +72,8 @@ interface State {
   showYearly: boolean;
   useMultidevice: boolean;
   requestTimeout: number;
+  // Server configuration
+  cors_origins: string;
 
   // Whether to hide visualizations that lack required data (default: off)
   hideUnsupportedVisualizations: boolean;
@@ -131,6 +133,7 @@ export const useSettingsStore = defineStore('settings', {
     useMultidevice: false,
     requestTimeout: 30,
     hideUnsupportedVisualizations: false,
+    cors_origins: '',
 
     _loaded: false,
     _storedKeys: [],
