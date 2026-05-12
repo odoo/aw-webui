@@ -74,6 +74,7 @@ interface State {
   requestTimeout: number;
   // Server configuration
   cors_origins: string;
+  cors_regex: string;
 
   // Whether to hide visualizations that lack required data (default: off)
   hideUnsupportedVisualizations: boolean;
@@ -134,6 +135,7 @@ export const useSettingsStore = defineStore('settings', {
     requestTimeout: 30,
     hideUnsupportedVisualizations: false,
     cors_origins: '',
+    cors_regex: '',
 
     _loaded: false,
     _storedKeys: [],

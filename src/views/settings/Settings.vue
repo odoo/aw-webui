@@ -61,10 +61,10 @@ export default {
     Theme,
     ColorSettings,
     DeveloperSettings,
-    ServerSettings,
     ActivePatternSettings,
     PrivacyFilterSettings,
     AwNotifySettings,
+    ServerSettings,
   },
   beforeRouteLeave(to, from, next) {
     const categoryStore = useCategoryStore();
@@ -83,8 +83,8 @@ export default {
   },
   computed: {
     activeGroup(): string {
-      const requested = this.group || 'general';
-      return this.groups.some(g => g.id === requested) ? requested : 'general';
+      const requested = this.group || 'server';
+      return this.groups.some(g => g.id === requested) ? requested : 'server';
     },
     groups(): Group[] {
       const general: Group = {
@@ -139,13 +139,13 @@ export default {
       };
 
       return [
+        serverSettings,
         general,
         appearance,
         categorization,
         notifications,
         privacy,
         developer,
-        serverSettings,
       ];
     },
   },
