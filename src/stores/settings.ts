@@ -46,7 +46,7 @@ interface State {
   requestTimeout: number;
   // Server configuration
   cors_origins: string;
-
+  cors_regex: string;
   // Set to true if settings loaded
   _loaded: boolean;
 }
@@ -86,6 +86,7 @@ export const useSettingsStore = defineStore('settings', {
     useMultidevice: false,
     requestTimeout: 30,
     cors_origins: '',
+    cors_regex: '',
 
     _loaded: false,
   }),

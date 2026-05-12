@@ -4,6 +4,10 @@ div
 
   hr
 
+  ServerSettings
+
+  hr
+
   DaystartSettings
 
   hr
@@ -37,10 +41,6 @@ div
   hr
 
   DeveloperSettings
-
-  hr
-
-  ServerSettings
 </template>
 
 <script lang="ts">
@@ -69,8 +69,8 @@ export default {
     Theme,
     ColorSettings,
     DeveloperSettings,
-    ServerSettings,
     ActivePatternSettings,
+    ServerSettings,
   },
   beforeRouteLeave(to, from, next) {
     const categoryStore = useCategoryStore();
