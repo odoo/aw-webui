@@ -31,8 +31,9 @@ export function buildTooltip(bucket, e) {
       <tr><th>Title</th><td>${sanitize(e.data.title)}</td></tr>
       <tr><th>URL</th><td><a href=${sanitize(e.data.url)}>${sanitize(e.data.url)}</a></td></tr>
       `;
-    if (e.data.gmail_activity) {
-      inner += `<tr><th>Gmail Activity</th><td>${sanitize(e.data.gmail_activity)}</td></tr>`;
+    if (e.data.gmail_activity || e.data.outlook_activity) {
+      const provider = e.data.gmail_activity ? 'Gmail' : 'Outlook';
+      inner += `<tr><th>${provider} Activity</th><td>${sanitize(e.data[`${provider.toLowerCase()}_activity`])}</td></tr>`;
       if (e.data.from) inner += `<tr><th>From</th><td>${sanitize(e.data.from)}</td></tr>`;
       if (e.data.subject) inner += `<tr><th>Subject</th><td>${sanitize(e.data.subject)}</td></tr>`;
       if (e.data.to && e.data.to.length > 0)
