@@ -55,6 +55,13 @@ export function buildTooltip(bucket, e) {
       <tr><th>Path</th><td>${sanitize(e.data.file)}</td></tr>
       <tr><th>Language</th><td>${sanitize(e.data.language)}</td></tr>
       `;
+  } else if (bucket.type == 'app.vscode.activity') {
+    inner = `
+      <tr><th>Branch</th><td>${sanitize(e.data.branch)}</td></tr>
+      <tr><th>Repository</th><td>${sanitize(e.data.repository)}</td></tr>
+      <tr><th>Folder</th><td>${sanitize(e.data.folder)}</td></tr>
+      <tr><th>Title</th><td>${sanitize(e.data.title)}</td></tr>
+      `;
   } else if (bucket.type.startsWith('general.stopwatch')) {
     inner = `
       <tr><th>Label</th><td>${sanitize(e.data.label)}</td></tr>
