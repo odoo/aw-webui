@@ -2,7 +2,14 @@
 div
   h3 {{ $t('timeline.title') }}
 
-  input-timeinterval(v-model="daterange", :defaultDuration="timeintervalDefaultDuration", :maxDuration="maxDuration").mb-3
+  //- ?start=<ISO>&end=<ISO> in the URL opens the timeline zoomed on that period
+  input-timeinterval(
+    v-model="daterange",
+    :defaultDuration="timeintervalDefaultDuration",
+    :maxDuration="maxDuration",
+    :initialStart="$route.query.start",
+    :initialEnd="$route.query.end"
+  ).mb-3
 
   // Toolbar: filters (primary), display kebab (swimlanes etc.), event count,
   // and keyboard hint. Flex-wrap so it doesn't overlap at narrow widths.
