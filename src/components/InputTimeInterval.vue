@@ -2,7 +2,7 @@
 div
   div
     b-alert(v-if="invalidDaterange", variant="warning", show)
-      | The selected date range is invalid. The second date must be greater or equal to the first date.
+      | The selected date range is invalid. The end must be after the start.
     b-alert(v-if="daterangeTooLong", variant="warning", show)
       | The selected date range is too long. The maximum is {{ maxDuration/(24*60*60) }} days.
 
@@ -37,12 +37,12 @@ div
             label(:for="'dur' + idx" v-html="dur.label").btn.btn-light.btn-sm
       div.d-flex.flex-wrap.align-items-center(v-else)
         input.form-control.form-control-sm.mr-1(
-          type="date", v-model="start", :max="end || undefined", style="width: auto"
-          aria-label="Start date"
+          type="datetime-local", v-model="start", :max="end || undefined", style="width: auto"
+          aria-label="Start date and time"
         )
         input.form-control.form-control-sm.mr-1(
-          type="date", v-model="end", :min="start || undefined", placeholder="(optional)", style="width: auto"
-          aria-label="End date (optional)"
+          type="datetime-local", v-model="end", :min="start || undefined", placeholder="(optional)", style="width: auto"
+          aria-label="End date and time (optional)"
         )
         b-button(
           size="sm" variant="outline-dark"
@@ -112,6 +112,16 @@ export default {
       type: Boolean,
       default: true,
     },
+    // Optional ISO 8601 datetimes (e.g. from URL query params). When initialStart
+    // is valid, the component starts in 'range' mode with this period applied.
+    initialStart: {
+      type: String,
+      default: null,
+    },
+    initialEnd: {
+      type: String,
+      default: null,
+    },
   },
   data() {
     return {
@@ -143,10 +153,8 @@ export default {
       get() {
         if (this.mode == 'range' && this.start) {
           const startDate = moment(this.start);
-          // If only start date is set, show that single day
-          const endDate = this.end
-            ? moment(this.end).add(1, 'day')
-            : startDate.clone().add(1, 'day');
+          // End is used as-is (exact datetime). If only start is set, show 24h from start.
+          const endDate = this.end ? moment(this.end) : startDate.clone().add(1, 'day');
           return [startDate, endDate];
         } else {
           return [moment().subtract(this.duration, 'seconds'), moment()];
@@ -158,15 +166,25 @@ export default {
     },
     invalidDaterange() {
       if (!this.end) return false;
-      return moment(this.start) > moment(this.end);
+      return !moment(this.start).isBefore(moment(this.end));
     },
     daterangeTooLong() {
       if (!this.end) return false;
       return moment(this.start).add(this.maxDuration, 'seconds').isBefore(moment(this.end));
     },
   },
+  watch: {
+    // Re-apply when the URL changes while the view stays mounted
+    initialStart() {
+      if (this.applyInitialRange()) this.valueChanged();
+    },
+    initialEnd() {
+      if (this.applyInitialRange()) this.valueChanged();
+    },
+  },
   mounted() {
     this.duration = this.defaultDuration;
+    this.applyInitialRange();
     this.valueChanged();
 
     // We want our lastUpdated text to update every ~500ms
@@ -181,6 +199,19 @@ export default {
     clearInterval(this.lastUpdateTimer);
   },
   methods: {
+    // Switches to 'range' mode using initialStart/initialEnd, converted to the
+    // local-time format of the datetime-local inputs. Returns true if applied.
+    applyInitialRange() {
+      const start = this.initialStart ? moment(this.initialStart, moment.ISO_8601) : null;
+      if (!start || !start.isValid()) return false;
+      const end = this.initialEnd ? moment(this.initialEnd, moment.ISO_8601) : null;
+      const format = 'YYYY-MM-DDTHH:mm:ss';
+      this.mode = 'range';
+      this.duration = 0;
+      this.start = start.format(format);
+      this.end = end && end.isValid() ? end.format(format) : null;
+      return true;
+    },
     valueChanged() {
       if (
         this.mode == 'last_duration' ||
