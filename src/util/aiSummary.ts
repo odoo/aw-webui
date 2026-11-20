@@ -12,6 +12,16 @@ export interface LLMConfig {
   model: string;
 }
 
+export const DEFAULT_MODELS: Record<LLMProvider, string> = {
+  openai: 'gpt-6-luna',
+  anthropic: 'claude-haiku-4-5-20251001',
+};
+const LEGACY_OPENAI_DEFAULT = 'gpt-4o-mini';
+
+export function isDefaultModel(model: string): boolean {
+  return model === LEGACY_OPENAI_DEFAULT || Object.values(DEFAULT_MODELS).includes(model);
+}
+
 const LS_KEY = 'aw-ai-summary-llm-config';
 
 export function loadLLMConfig(): Partial<LLMConfig> {
@@ -21,6 +31,8 @@ export function loadLLMConfig(): Partial<LLMConfig> {
     if (config.provider !== 'openai' && config.provider !== 'anthropic') {
       delete config.provider;
       delete config.model;
+    } else if (config.provider === 'openai' && config.model === LEGACY_OPENAI_DEFAULT) {
+      config.model = DEFAULT_MODELS.openai;
     }
     return config;
   } catch {
@@ -38,6 +50,7 @@ export async function callLLM(config: LLMConfig, userMessage: string): Promise<s
   if (!config.apiKey) throw new Error('API key is required');
 
   if (config.provider === 'openai') {
+    const model = config.model || DEFAULT_MODELS.openai;
     const res = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -45,9 +58,10 @@ export async function callLLM(config: LLMConfig, userMessage: string): Promise<s
         Authorization: `Bearer ${config.apiKey}`,
       },
       body: JSON.stringify({
-        model: config.model || 'gpt-4o-mini',
+        model,
         messages: [{ role: 'user', content: userMessage }],
-        max_tokens: 1024,
+        max_completion_tokens: 1024,
+        ...(model === DEFAULT_MODELS.openai ? { reasoning_effort: 'none' } : {}),
       }),
     });
     if (!res.ok) {
@@ -67,7 +81,7 @@ export async function callLLM(config: LLMConfig, userMessage: string): Promise<s
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: config.model || 'claude-haiku-4-5-20251001',
+        model: config.model || DEFAULT_MODELS.anthropic,
         max_tokens: 1024,
         messages: [{ role: 'user', content: userMessage }],
       }),

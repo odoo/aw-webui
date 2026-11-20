@@ -16,10 +16,22 @@ describe('LLM config storage', () => {
   beforeEach(() => values.clear());
 
   test('persists provider settings without the API key', () => {
-    saveLLMConfig({ provider: 'openai', model: 'gpt-4o-mini', apiKey: 'secret' });
+    saveLLMConfig({ provider: 'openai', model: 'my-custom-model', apiKey: 'secret' });
 
-    expect(loadLLMConfig()).toEqual({ provider: 'openai', model: 'gpt-4o-mini' });
+    expect(loadLLMConfig()).toEqual({ provider: 'openai', model: 'my-custom-model' });
     expect(localStorage.getItem('aw-ai-summary-llm-config')).not.toContain('secret');
+  });
+
+  test('loads a saved legacy OpenAI default as the replacement model', () => {
+    saveLLMConfig({ provider: 'openai', model: 'gpt-4o-mini' });
+
+    expect(loadLLMConfig()).toEqual({ provider: 'openai', model: 'gpt-6-luna' });
+  });
+
+  test('does not migrate saved models for another provider', () => {
+    saveLLMConfig({ provider: 'anthropic', model: 'custom-claude-model' });
+
+    expect(loadLLMConfig()).toEqual({ provider: 'anthropic', model: 'custom-claude-model' });
   });
 
   test('discards a stale unsupported provider', () => {
@@ -50,12 +62,33 @@ describe('callLLM', () => {
     });
 
     await expect(
-      callLLM({ provider: 'openai', apiKey: 'secret', model: 'gpt-4o-mini' }, 'Activity')
+      callLLM({ provider: 'openai', apiKey: 'secret', model: '' }, 'Activity')
     ).resolves.toBe('Summary');
     expect(fetchMock).toHaveBeenCalledWith(
       'https://api.openai.com/v1/chat/completions',
       expect.any(Object)
     );
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+      model: 'gpt-6-luna',
+      messages: [{ role: 'user', content: 'Activity' }],
+      max_completion_tokens: 1024,
+      reasoning_effort: 'none',
+    });
+  });
+
+  test('keeps the requested custom OpenAI model', async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({ choices: [{ message: { content: 'Summary' } }] }),
+    });
+
+    await callLLM({ provider: 'openai', apiKey: 'secret', model: 'custom-model' }, 'Activity');
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+      model: 'custom-model',
+      messages: [{ role: 'user', content: 'Activity' }],
+      max_completion_tokens: 1024,
+    });
   });
 
   test('sends Anthropic requests to the CSP-allowed endpoint', async () => {

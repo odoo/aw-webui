@@ -34,7 +34,7 @@ div
 
     div.col-md-6
       b-form-group(label="Model" label-class="font-weight-bold")
-        b-form-input(v-model="model" placeholder="e.g. gpt-4o-mini" @blur="persistConfig")
+        b-form-input(v-model="model" :placeholder="defaultModel" @blur="persistConfig")
 
   div.mb-3
     b-form-group(label="Privacy" label-class="font-weight-bold")
@@ -89,7 +89,14 @@ import { useBucketsStore } from '~/stores/buckets';
 import { useCategoryStore } from '~/stores/categories';
 import { getClient } from '~/util/awclient';
 import { analysisContextQuery } from '~/queries';
-import { loadLLMConfig, saveLLMConfig, callLLM, type LLMProvider } from '~/util/aiSummary';
+import {
+  DEFAULT_MODELS,
+  isDefaultModel,
+  loadLLMConfig,
+  saveLLMConfig,
+  callLLM,
+  type LLMProvider,
+} from '~/util/aiSummary';
 import {
   buildActivityContext,
   formatActivityContext,
@@ -162,8 +169,7 @@ export default {
       return privateCategoriesFrom(this.categoryStore.classes || []);
     },
     defaultModel(): string {
-      if (this.provider === 'anthropic') return 'claude-haiku-4-5-20251001';
-      return 'gpt-4o-mini';
+      return DEFAULT_MODELS[this.provider];
     },
   },
   async mounted() {
@@ -178,11 +184,7 @@ export default {
   },
   methods: {
     onProviderChange() {
-      if (
-        !this.model ||
-        this.model === 'gpt-4o-mini' ||
-        this.model === 'claude-haiku-4-5-20251001'
-      ) {
+      if (!this.model || isDefaultModel(this.model)) {
         this.model = this.defaultModel;
       }
       this.persistConfig();
